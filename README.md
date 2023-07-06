@@ -29,7 +29,7 @@ The tool should accept the following inputs:
 
 1. An optional start position.
 2. An optional end position.
-3. An optional minimum depth (minDP).
+3. An optional DP.
 4. A mandatory limit specifying the maximum number of output lines per sample.
 
 The primary output of this tool will be a set of new VCF files named `<SAMPLE>_filtered.vcf`.
@@ -38,6 +38,6 @@ The primary output of this tool will be a set of new VCF files named `<SAMPLE>_f
 
 The main features of this project include parsing VCF files, processing and filtering genetic variants based on user-specified parameters, and producing formatted output files.
 
-## Technologies
+## Planning
+![image](https://github.com/avivsarig/VCFParser/assets/97254290/c8870de5-c916-400f-8d43-4e33af5424fa)
 
-While the technology stack is yet to be decided, this solution could be implemented using various programming languages and technologies. It could be a Python script or a Java project, for instance.
