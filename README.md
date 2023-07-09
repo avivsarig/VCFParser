@@ -1,43 +1,71 @@
-# VCFParser
+# VCF File Filter and Parser
 
-## Status
+This project consists of a VCF file parser and filter. It handles compressed VCF files stored in Amazon S3, parses the files to extract relevant information, applies specific filtering criteria, and outputs the filtered results into separate files.
 
-This project is in the early stages of development. The problem has been defined, and work is underway to devise an effective and efficient solution.
+## How to Use
 
-Please refer back to this README for updates as the project evolves.
+### Prerequisites
 
-## Overview
+- Python 3.7 or later
+- An AWS account with permissions to access S3
+- The following Python libraries: boto3, requests, and typer
 
-This project focuses on processing Variant Call Format (VCF) files, commonly used in bioinformatics to store gene sequence variations. The tool takes a VCF file, analyzes it according to provided parameters, and produces multiple output files each corresponding to a sample from the initial VCF file.
+### Running the Application
 
-## Problem
+1. Clone the repository:
+   ```
+   git clone <repository_url>
+   ```
+2. Navigate into the project directory:
+   ```
+   cd <project_directory>
+   ```
+3. Install the required Python packages:
+   ```
+   pip install -r requirements.txt
+   ```
+4. Run the application:
+   ```
+   python main.py
+   ```
 
-The VCF file, which can contain a list of dozens to millions of genetic variants (mutations) from various samples, needs to be processed and split into separate VCF files per sample.
+### Application Commands
 
-Each output file should contain:
+The application supports the following commands:
 
-- The VCF header as is.
-- The VCF column line with the relevant sample's column.
-- Variant lines present in that sample, filtered based on user-defined parameters for start and end positions and minimum depth (DP).
-- An added subfield in the INFO column for each variant line, specifying the gene of that variant.
+1. **Filtering**: This command downloads a compressed VCF file, parses it, applies filters, and outputs the results into separate files.
 
-The processing should stop when reaching the end of the original VCF file, or after outputting the number of lines specified by the user in the limit parameter for each sample.
+   ```
+   python main.py filter --limit <limit> --start <start> --end <end> --minDP <minDP> --deNovo <deNovo>
+   ```
 
-## Inputs and Outputs
+   Arguments:
 
-The tool should accept the following inputs:
+   - limit: Maximum number of variants to be processed.
+   - start: The start position for filtering. Defaults to 0.
+   - end: The end position for filtering. Defaults to -1, which means no end limit.
+   - minDP: Minimum depth to filter by. Defaults to -1, which means no depth limit.
+   - deNovo: Boolean flag for de novo mutations. If True, only de novo mutations are considered.
 
-1. An optional start position.
-2. An optional end position.
-3. An optional DP.
-4. A mandatory limit specifying the maximum number of output lines per sample.
+2. **Clear Cache**: This command resets the contents of the Gene Cache.
+   ```
+   python main.py clear_cache
+   ```
+3. **Clear Output**: This command resets the contents of the output folder.
+   ```
+   python main.py clear_output
+   ```
 
-The primary output of this tool will be a set of new VCF files named `<SAMPLE>_filtered.vcf`.
+## Code Structure
 
-## Features
+The main components of the application are:
 
-The main features of this project include parsing VCF files, processing and filtering genetic variants based on user-specified parameters, and producing formatted output files.
+- `main.py`: The entry point of the application. It handles the user commands.
+- `utils`: This directory contains various utility functions, including S3 file retrieval, API calls, and data classification.
+- `parse_functions`: This directory contains functions for parsing and filtering the VCF data.
 
-## Planning
-![image](https://github.com/avivsarig/VCFParser/assets/97254290/c8870de5-c916-400f-8d43-4e33af5424fa)
+Please note that this application makes use of the Gene API for gene retrieval, and stores the results in a local cache for faster future retrievals. The cache is stored in a `json` file and can be reset using the 'clear_cache' command.
 
+## Important
+
+Please remember that this application requires appropriate AWS credentials set up in your environment to access the S3 service.
