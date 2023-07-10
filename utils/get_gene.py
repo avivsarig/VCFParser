@@ -1,15 +1,19 @@
 import json
 import requests
 import time
-from utils.config import API_URI
+import os
 
-with open("gene_cache.json") as f:
+API_URI = os.getenv("API_URI", "https://test.genoox.com/api/fetch_variant_details")
+CACHE_FILE = "gene_cache.json"
+
+with open(CACHE_FILE) as f:
     cache = json.load(f)
 
 MAX_RETRIES = 5
 RETRY_DELAY = 3
 
-def gene_from_api(line):
+
+def get_gene_payload(line):
     payload = {
         "chr": line["CHROM"],
         "pos": line["POS"],
@@ -17,27 +21,49 @@ def gene_from_api(line):
         "alt": line["ALT"],
         "reference_version": "hg19",
     }
+    return payload
 
+
+def get_gene_from_cache(key):
+    return cache.get(key)
+
+
+def update_cache(key, value):
+    cache[key] = value
+    with open(CACHE_FILE, "w") as f:
+        json.dump(cache, f)
+
+
+def fetch_gene_from_api(payload):
+    for attempt in range(MAX_RETRIES):
+        try:
+            res = requests.post(API_URI, json=payload)
+            res.raise_for_status()
+            gene = res.json()["gene"]
+            return gene
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}. Attempt {attempt + 1} of {MAX_RETRIES}")
+            time.sleep(RETRY_DELAY)
+
+        except Exception as e:
+            print(f"Error with fetching gene from API for:\n{payload}")
+            print(f"Exception: {e}")
+            return False
+
+    return None
+
+
+def gene_from_api(line):
+    payload = get_gene_payload(line)
     key = str(payload)
-    if key in cache:
-        return cache[key]
-    else:
-        for attempt in range(MAX_RETRIES):
-            try:
-                res = requests.post(API_URI, json=payload)
-                res.raise_for_status()
-                cache[key] = res.json()["gene"]
 
-                with open("gene_cache.json", "w") as f:
-                    json.dump(cache, f)
+    gene = get_gene_from_cache(key)
+    if gene:
+        return gene
 
-                return res.json()["gene"]
+    gene = fetch_gene_from_api(payload)
+    if gene:
+        update_cache(key, gene)
 
-            except requests.exceptions.RequestException as e:
-                print(f"Error: {e}. Attempt {attempt + 1} of {MAX_RETRIES}")
-                time.sleep(RETRY_DELAY)
-            
-            except Exception as e:
-                print(f"Error with fetching gene from API for:\n{payload}")
-                print(f"Exception: {e}")
-                return False
+    return gene

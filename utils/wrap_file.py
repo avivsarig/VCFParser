@@ -12,5 +12,4 @@ def lines_to_file(sample_name, header, raw_columns, current_sample):
         print(f"Error writing to file {file_name}: {e}")
         return False
 
-
     print(f"{file_name} created successfully")

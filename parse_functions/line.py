@@ -7,7 +7,7 @@ def parse_data_line(line, columns):
         try:
             key, value = item.split("=")
             info[key] = value
-        
+
         except ValueError as e:
             print(f"Error parsing INFO field: {e}. Item: {item}")
 
@@ -17,7 +17,7 @@ def parse_data_line(line, columns):
 
 
 def unparse_data_line(parsed_line):
-    if type(parsed_line['INFO']) == dict:
+    if type(parsed_line["INFO"]) == dict:
         unparsed_info = []
         for key, value in parsed_line["INFO"].items():
             unparsed_instance = f"{key}={value}"
